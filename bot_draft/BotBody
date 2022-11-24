@@ -1,0 +1,207 @@
+
+const modalView = JSON.stringify({
+  type: "modal",
+  callback_id: "schedule",
+  title: {
+    type: "plain_text",
+    text: "Schedule message",
+    emoji: true,
+  },
+  submit: {
+    type: "plain_text",
+    text: "Submit",
+    emoji: true,
+  },
+  close: {
+    type: "plain_text",
+    text: "Cancel",
+    emoji: true,
+  },
+  blocks:
+  [
+    { type: "input",
+      block_id: "message",
+      element: {
+        type: "plain_text_input",
+        multiline: true,
+        action_id: "input",
+      },
+      optional: true,
+      label: {
+        type: "plain_text",
+        text: "Message",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      block_id: "date",
+      element: {
+        type: "datepicker",
+        placeholder: {
+          type: "plain_text",
+          text: "Select a date",
+          emoji: true,
+        },
+        action_id: "input",
+      },
+      label: {
+        type: "plain_text",
+        text: "Date to schedule",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      block_id: "time",
+      element: {
+        type: "timepicker",
+        placeholder: {
+          type: "plain_text",
+          text: "Select a time",
+          emoji: true,
+        },
+        action_id: "input",
+      },
+      label: {
+        type: "plain_text",
+        text: "Time",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      optional: true,
+      block_id: "users",
+      element: {
+        type: "multi_users_select",
+        placeholder: {
+          type: "plain_text",
+          text: "Select users",
+          emoji: true,
+        },
+        action_id: "select",
+      },
+      label: {
+        type: "plain_text",
+        text: "User",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      optional: true,
+      block_id: "channels",
+      element: {
+        type: "multi_channels_select",
+        placeholder: {
+          type: "plain_text",
+          text: "Select channels",
+          emoji: true,
+        },
+        action_id: "select",
+      },
+      label: {
+        type: "plain_text",
+        text: "Channels",
+        emoji: true,
+      },
+    },
+    {
+      type: "input",
+      optional: true,
+      block_id: "conversations",
+      element: {
+        type: "multi_conversations_select",
+        placeholder: {
+          type: "plain_text",
+          text: "Select channels",
+          emoji: true,
+        },
+        action_id: "select",
+      },
+      label: {
+        type: "plain_text",
+        text: "Conversations",
+        emoji: true,
+      },
+    },
+  ],
+});
+
+app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
+  try {
+
+    const result = await client.views.open({
+      trigger_id: shortcut.trigger_id,
+      view: modalView,
+    });
+  } catch (error) {
+    logger.error(error);
+  }
+});
+
+app.view("schedule", async ({ ack, body, view, client, logger }) => {
+  try {
+
+    const user = body.user.id;
+
+    const message = view.state.values.message.input.value;
+    const date = new Date(view.state.values.date.input.selected_date);
+    const time = parseTime(view.state.values.time.input.selected_time);
+    const users = view.state.values.users.select.selected_users;
+    const channels = view.state.values.channels.select.selected_channels;
+    const conversations =
+      view.state.values.conversations.select.selected_conversations;
+
+    const dateFormat = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      time.getHours(),
+      time.getMinutes(),
+      0
+    );
+
+    await prisma.schedule.create({
+      data: {
+        user,
+        message,
+        date: dateFormat,
+        users,
+        channels,
+        conversations,
+      },
+    });
+    const messages = await prisma.schedule.findFirst({
+      where: {
+        date: {
+          lte: new Date(),
+        },
+      },
+    });
+    console.log(messages);
+
+  } catch (error) {
+    logger.error(error);
+  }
+});
+
+cron.schedule("* * * * *", async () => {
+  const messages = await prisma.schedule.findMany({
+    where: {
+      date: {
+        lte: new Date(),
+      },
+    },
+  });
+  console.log(messages);
+});
+
+function parseTime(t) {
+  const d = new Date();
+  const time = t.match(/(\d+)(?::(\d\d))?\s*(p?)/);
+  d.setHours(parseInt(time[1]) + (time[3] ? 12 : 0));
+  d.setMinutes(parseInt(time[2]) || 0);
+  return d;
+}

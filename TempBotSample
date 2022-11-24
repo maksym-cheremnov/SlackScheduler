@@ -1,0 +1,176 @@
+app.message('hello', async ({ message, say }) => {
+  await say({
+    blocks: [
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": `Hey there <@${message.user}>!`
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Click Me"
+          },
+          "action_id": "button_click"
+        }
+      }
+    ],
+    text: `Hey there <@${message.user}>!`
+  });
+});
+app.action('button_click', async ({ body, ack, say }) => {
+  // Acknowledge the action
+  await ack();
+  await say(`<@${body.user.id}> clicked the button`);
+});
+app.command('/ticket', async ({ ack, body, client, logger }) => {
+  // Acknowledge the command request
+  await ack();
+
+  try {
+    // Call views.open with the built-in client
+    const result = await client.views.open({
+      // Pass a valid trigger_id within 3 seconds of receiving it
+      trigger_id: body.trigger_id,
+      // View payload
+      view: {
+        type: 'modal',
+        // View identifier
+        callback_id: 'view_1',
+        private_metadata:body.channel_id,
+        title: {
+          type: 'plain_text',
+          text: 'Modal title'
+        },
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: 'Welcome to a modal with _blocks_'
+            },
+            accessory: {
+              type: 'button',
+              text: {
+                type: 'plain_text',
+                text: 'Click me!'
+              },
+              action_id: 'button_abc'
+            }
+          },
+          {
+            type: 'input',
+            block_id: 'input_c',
+            label: {
+              type: 'plain_text',
+              text: 'What are your hopes and dreams?'
+            },
+            element: {
+              type: 'plain_text_input',
+              action_id: 'dreamy_input',
+              multiline: true
+            }
+          }
+        ],
+        submit: {
+          type: 'plain_text',
+          text: 'Submit'
+        }
+      }
+    });
+    logger.info(result);
+  }
+  catch (error) {
+    logger.error(error);
+  }
+});
+app.action('button_abc', async ({ ack, body, client, logger }) => {
+  // Acknowledge the button request
+  await ack();
+
+  try {
+    // Call views.update with the built-in client
+    const result = await client.views.update({
+      // Pass the view_id
+      view_id: body.view.id,
+      // Pass the current hash to avoid race conditions
+      hash: body.view.hash,
+      // View payload with updated blocks
+      view: {
+        type: 'modal',
+        // View identifier
+        callback_id: 'view_1',
+        title: {
+          type: 'plain_text',
+          text: 'Updated modal'
+        },
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'plain_text',
+              text: 'You updated the modal!'
+            }
+          },
+          {
+            type: 'image',
+            image_url: 'https://media.giphy.com/media/SVZGEcYt7brkFUyU90/giphy.gif',
+            alt_text: 'Yay! The modal was updated'
+          }
+        ]
+      }
+    });
+    logger.info(result);
+  }
+  catch (error) {
+    logger.error(error);
+  }
+});
+// Handle a view_submission request
+app.view('view_1', async ({ ack, body, view, client, logger }) => {
+  // Acknowledge the view_submission request
+  await ack();
+
+  // Do whatever you want with the input data - here we're saving it to a DB then sending the user a verifcation of their submission
+
+  // Assume there's an input block with `block_1` as the block_id and `input_a`
+  const val = view['state']['values']['input_c']['dreamy_input']['value'];
+  const workspace_id = client['team_id'];
+  const user_id = body['user']['id'];
+  const channel_id = view['private_metadata']
+  try
+  {
+    const conversations_list = await client.conversations.list({
+      team_id:workspace_id,
+      types:('im', 'private_channel', 'public_channel', 'mpim'),
+      limit:50
+    });
+    //const conversationId = conversations_list[workspace_id];
+
+    await client.chat.postMessage({
+      channel: channel_id,
+      text: val,
+      as_user:true
+    });
+  }
+  catch (error) {
+    logger.error(error);
+  }
+
+});
+
+  // Update the view on submission 
+app.view('modal-callback-id', async ({ ack, body }) => {
+  await ack({
+    response_action: 'update',
+    view: buildNewModalView(body),
+  });
+});
+// Handle a view_closed request
+app.view({ callback_id: 'view_b', type: 'view_closed' }, async ({ ack, body, view, client }) => {
+  // Acknowledge the view_closed request
+  await ack();
+  // react on close request
+});
