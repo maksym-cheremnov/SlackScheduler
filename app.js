@@ -1,11 +1,10 @@
 require("dotenv").config();
 const { App } = require("@slack/bolt");
-const {scheduleJob} = require("node-schedule")
+const { scheduleJob } = require("node-schedule")
 const { PrismaClient } = require("@prisma/client");
-const func = require('./functions.js');
-const time = require('./date_planner.js');
+const { validateScheduling } = require('./functions.js');
+const { getScheduledTimes, getScheduledPattern } = require('./date_planner.js');
 const modalView = require(('./modal_view_body.js'));
-const messageView = require(('./schedule_message_body.js'));
 const database = require(('./database_action_handler.js'));
 
 const prisma = new PrismaClient();
@@ -13,9 +12,9 @@ const prisma = new PrismaClient();
 const app = new App({
   token: process.env.SLACK_USER_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode:true,
-  appToken:process.env.SLACK_APP_TOKEN,
-  port:process.env.USER_PORT || 3000
+  socketMode: true,
+  appToken: process.env.SLACK_APP_TOKEN,
+  port: process.env.USER_PORT || 3000
 });
 
 app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
@@ -49,11 +48,10 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
       selected_days.push(elem.value);
     });
 
-    const scheduledDateTime = time.getScheduledTimes(viewValues);
-    const scheduledPattern = time.getScheduledPattern(viewValues);
+    const scheduledDateTime = getScheduledTimes(viewValues);
+    const scheduledPattern = getScheduledPattern(viewValues);
 
-    if (func.validateScheduling(scheduledDateTime))
-    {
+    if (validateScheduling(scheduledDateTime)) {
       await prisma.schedule.create({
         data: {
           user,
@@ -61,32 +59,31 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
           date: scheduledDateTime,
           isRepeated,
           repeat_pattern: scheduledPattern,
-          repeat_custom_days:selected_days,
-          repeat_end_date:endDate_text,
+          repeat_custom_days: selected_days,
+          repeat_end_date: endDate_text,
           users: selected_users,
           channels: selected_channels,
           conversations: selected_conversations,
         },
       });
-      
+
       try {
-        for(const element of selected_conversations)
-        {
-            const schedule_result = await client.chat.scheduleMessage({
-                channel:  element,
-                text: message_text,
-                post_at: scheduledDateTime.getTime() / 1000,
-                as_user:true
-            });
-            console.log(schedule_result);
-            const msgs = await client.chat.scheduledMessages.list();
-            console.log("Already scheduled messages:");
-            console.log(msgs);
+        for (const element of selected_conversations) {
+          const schedule_result = await client.chat.scheduleMessage({
+            channel: element,
+            text: message_text,
+            post_at: scheduledDateTime.getTime() / 1000,
+            as_user: true
+          });
+          console.log(schedule_result);
+          const msgs = await client.chat.scheduledMessages.list();
+          console.log("Already scheduled messages:");
+          console.log(msgs);
         }
         const result = await client.chat.postEphemeral({
           channel: body.user.id,
           user: user,
-          as_user:true,
+          as_user: true,
           text: "Shhhh I'll tell you a secret soon :shushing_face:"
         });
         console.log(result);
@@ -100,29 +97,28 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
   }
 });
 
-app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
-  await ack();
-});
+// app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
+//   await ack();
+// });
 
-app.action('repeat_pattern',  async ({ action, body, client, ack, logger }) => {
+app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   await ack();
-  try
-  {
+  try {
     const viewVal = modalView.CreateModalView(body.view.private_metadata, action.selected_option);
     await client.views.update({
-      view:viewVal,
-      view_id:body.view.id
+      view: viewVal,
+      view_id: body.view.id
     });
   }
-  catch(error)
-  {
+  catch (error) {
     logger.error(error);
   }
 });
 
+
 // cron.schedule("* * 1 * *", async () => {
 scheduleJob("*/5 * * * *", async () => {
-  try{
+  try {
     await database.clearAndUpdateOutdatedMessages(prisma);
     const time = new Date();
     const messages = await prisma.schedule.findMany({
@@ -135,7 +131,7 @@ scheduleJob("*/5 * * * *", async () => {
     console.log(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`);
     console.log(messages);
   }
-  catch(error){
+  catch (error) {
     console.error(error);
   }
 });

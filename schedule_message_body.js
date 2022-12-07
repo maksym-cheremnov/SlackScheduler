@@ -1,8 +1,9 @@
-const func = require("./Functions.js");
-exports.CreateScheduledMessagesView = async (prisma) => {
+const { extractMessageFromDatabase } = require("./Functions.js");
+
+exports.CreateScheduledMessagesView = async (userId) => {
     let blocks = [];
     createHeader(blocks);
-    await createScheduledMsgInfo(prisma, blocks);
+    await createScheduledMsgInfo(blocks, userId);
     return JSON.stringify({
         type: "home",
         blocks: blocks,
@@ -23,14 +24,14 @@ function createHeader(blocks) {
     });
 }
 
-createScheduledMsgInfo = async (prisma, blocks) => {
-    const messages = await func.extractMessageFromDatabase(prisma);
-    messages.forEach((element) => {
+createScheduledMsgInfo = async (blocks, userId) => {
+    const messages = await extractMessageFromDatabase(userId);
+    messages.forEach(({ date, conversations, message, id }) => {
         blocks.push({
             type: "section",
             text: {
                 type: "mrkdwn",
-                text: `*${element.date}*\nMessage scheduled to conversations:\nMessage text:${element.message}`,
+                text: `*${date}*\nMessage scheduled to conversations: ${conversations.join(',')}\nMessage text:${message}`,
             },
             accessory: {
                 type: "overflow",
@@ -41,7 +42,7 @@ createScheduledMsgInfo = async (prisma, blocks) => {
                             text: "View",
                             emoji: true,
                         },
-                        value: "view",
+                        value: "view " + id,
                     },
                     {
                         text: {
@@ -49,7 +50,7 @@ createScheduledMsgInfo = async (prisma, blocks) => {
                             text: "Edit",
                             emoji: true,
                         },
-                        value: "edit",
+                        value: "edit " + id ,
                     },
                     {
                         text: {
@@ -57,7 +58,7 @@ createScheduledMsgInfo = async (prisma, blocks) => {
                             text: "Delete",
                             emoji: true,
                         },
-                        value: "delete",
+                        value: "delete " + id,
                     },
                 ],
                 action_id: "message_action",

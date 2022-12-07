@@ -14,13 +14,12 @@ exports.createTask = async ({ pattern_type, repeat_end_date, user, users, channe
 }
 
 exports.cancelTask = (job_id) => {
-    schedule.cancelJob(job.job_id);
+    this.cancelSchedule(job_id);
     prisma.job.update({
         where: {
             job_id: job_id
         }, data: {
             status: jobStatus.CANCEL,
-            update_at: new Date().getTime()
         }
     })
 

@@ -47,6 +47,12 @@ function createMessageBlock(blocks) {
     });
 }
 
+function setRepeatPatternOptions(selectedPattern, blocks) {
+    setSelectedPattern(selectedPattern, blocks);
+    createCustomDaysSelector(selectedPattern, blocks);
+    setDateTimeOption(selectedPattern, blocks);
+}
+
 function setSelectedPattern(selectedPattern, blocks) {
     const value = selectedPattern.value ?? "none";
     const text = selectedPattern?.text?.text ?? "Don't repeat message";
@@ -83,7 +89,7 @@ function setSelectedPattern(selectedPattern, blocks) {
                     },
                 },
                 {
-                    value: "weekDaily",
+                    value: "weekDay",
                     text: {
                         type: "plain_text",
                         text: "Every week day",
@@ -97,7 +103,7 @@ function setSelectedPattern(selectedPattern, blocks) {
                     },
                 },
                 {
-                    value: "twoWeeks",
+                    value: "onceTwoWeeks",
                     text: {
                         type: "plain_text",
                         text: "Every two weeks",
@@ -122,11 +128,6 @@ function setSelectedPattern(selectedPattern, blocks) {
     });
 }
 
-function setRepeatPatternOptions(selectedPattern, blocks) {
-    setSelectedPattern(selectedPattern, blocks);
-    createCustomDaysSelector(selectedPattern, blocks);
-    setDateTimeOption(selectedPattern, blocks);
-}
 
 function setDateTimeOption(selectedPattern, blocks) {
     blocks.push({

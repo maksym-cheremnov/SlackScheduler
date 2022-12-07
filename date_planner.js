@@ -1,4 +1,3 @@
-const func = require("./functions.js");
 const msInDay = 86_400_000;
 const msInWeek = 7 * msInDay;
 

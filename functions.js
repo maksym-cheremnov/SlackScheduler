@@ -1,4 +1,7 @@
+const { PrismaClient } = require("@prisma/client")
+
 const now = new Date();
+const prisma = new PrismaClient();
 
 exports.validateScheduling = (scheduled) => {
     const today = new Date().getDate();
@@ -80,13 +83,14 @@ exports.createScheduledMsgs = async (client, channel_id, text) => {
     }
 };
 
-exports.extractMessageFromDatabase = async (prisma) => {
+exports.extractMessageFromDatabase = async (userId) => {
     const time = new Date();
     const messages = await prisma.schedule.findMany({
         where: {
             date: {
                 lte: time,
             },
+            user: userId
         },
     });
 
@@ -142,5 +146,4 @@ exports.customCronType = (arr) => {
 
     const parsedCron = cronString.slice(0, cronString.length - 1)
     return parsedCron
-
 }
