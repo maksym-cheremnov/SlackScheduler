@@ -6,8 +6,11 @@ const { validateScheduling } = require('./functions.js');
 const { getScheduledTimes, getScheduledPattern } = require('./date_planner.js');
 const modalView = require(('./modal_view_body.js'));
 const database = require(('./database_action_handler.js'));
-
+const { slackScheduleMsg, customCronType } = require('./functions');
 const prisma = new PrismaClient();
+const { createTask, cancelTask, addTask, restoreTasks } = require('./schedule.service.js');
+const {cron} = require("cron-validate")
+const { cronTypes } = require("./types.js");
 
 const app = new App({
   token: process.env.SLACK_USER_TOKEN,
@@ -96,6 +99,51 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
     logger.error(error);
   }
 });
+
+app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) => {
+  try {
+    await ack();
+    const user = body.user.id;
+    const viewValues = view.state.values;
+    switch (viewValues.schedule_repeat.repeat_pattern.selected_option.value) {
+      case "none":
+        //scheduleMessage
+        break;
+      case "daily":
+        createTask(cronTypes.daily, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        break;
+
+      case "weekDay":
+        createTask(cronTypes.weekDay, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        break;
+
+      case "weelky":
+        createTask(cronTypes.weelky, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        break;
+
+      case "onceTwoWeeks":
+        createTask(cronTypes.onceTwoWeeks, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        break;
+
+      case "monthly":
+        createTask(cronTypes.monthly, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        break;
+
+      case "custom":
+        const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
+        const newCron = cron(customCron);
+        if(newCron.isValid()){
+          createTask(customCron, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        }
+        
+        break;
+
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+
+})
 
 // app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
 //   await ack();

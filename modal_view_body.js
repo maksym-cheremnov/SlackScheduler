@@ -215,49 +215,49 @@ function createCustomDaysSelector(selectedPattern, blocks) {
                 },
                 options: [
                     {
-                        value: "0",
+                        value: "1",
                         text: {
                             type: "plain_text",
                             text: "Monday",
                         },
                     },
                     {
-                        value: "1",
+                        value: "2",
                         text: {
                             type: "plain_text",
                             text: "Tuesday",
                         },
                     },
                     {
-                        value: "2",
+                        value: "3",
                         text: {
                             type: "plain_text",
                             text: "Wednesday",
                         },
                     },
                     {
-                        value: "3",
+                        value: "4",
                         text: {
                             type: "plain_text",
                             text: "Thursday",
                         },
                     },
                     {
-                        value: "4",
+                        value: "5",
                         text: {
                             type: "plain_text",
                             text: "Friday",
                         },
                     },
                     {
-                        value: "5",
+                        value: "6",
                         text: {
                             type: "plain_text",
                             text: "Saturday",
                         },
                     },
                     {
-                        value: "6",
+                        value: "7",
                         text: {
                             type: "plain_text",
                             text: "Sunday",

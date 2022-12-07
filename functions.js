@@ -139,11 +139,11 @@ exports.slackScheduleMsg = async (channelId, messageText, execTime) => {
 }
 
 exports.customCronType = (arr) => {
+    const parsedArr = arr.sort(function(a,b) {return a - b});
     let cronString = "0 0 * * ";
-    arr.map(val => {
+    parsedArr.map(val => {
         cronString += val + ',';
     })
-
     const parsedCron = cronString.slice(0, cronString.length - 1)
     return parsedCron
 }
