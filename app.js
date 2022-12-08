@@ -108,7 +108,7 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
     switch (viewValues.schedule_repeat.repeat_pattern.selected_option.value) {
       case "none":
         const post_at = getParsedTime(viewValues);
-        sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value, post_at)
+        sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value, post_at);
         break;
       case "daily":
         createTask(cronTypes.daily, viewValues.pattern_end.date_value.selected_date, user,  viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);

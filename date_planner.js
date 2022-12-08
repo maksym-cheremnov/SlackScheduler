@@ -159,7 +159,7 @@ exports.isTimeValidForScheduling = (time) => {
     return time.getTime() < this.getFarthestDayForScheduling(new Date());
 };
 
-function parseTime(t) {
+exports.parseTime = (t) => {
     const d = new Date();
     const time = t.match(/(\d+)(?::(\d\d))?\s*(p?)/);
     d.setHours(parseInt(time[1]) + (time[3] ? 12 : 0));

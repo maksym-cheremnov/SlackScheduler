@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const { request } = require("undici");
+const { parseTime } = require("./date_planner");
 const now = new Date();
 const prisma = new PrismaClient();
 
@@ -153,13 +154,14 @@ exports.customCronType = (arr) => {
 }
 
 exports.postMessage = (channelId, messageText, execTime) => {
-    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${execTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+    const parseTime = execTime.getTime() / 1000
+    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parseTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
 }
 
 exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {
     conversations.forEach((conversation) => {
         this.slackScheduleMsg(client, conversation, messageText, execTime)
-        this.sleep(1000)
+        // this.sleep(1000)
     })
 }
 
