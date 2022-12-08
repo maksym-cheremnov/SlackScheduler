@@ -1,6 +1,6 @@
 require("dotenv").config();
 const { App } = require("@slack/bolt");
-const {CreateScheduledMessagesView} = require(('./schedule_message_body.js'));
+const { CreateScheduledMessagesView } = require(('./schedule_message_body.js'));
 
 const bot = new App({
     token: process.env.SLACK_BOT_TOKEN,

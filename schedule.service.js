@@ -1,6 +1,6 @@
 const { scheduleJob } = require("node-schedule");
 const { PrismaClient } = require("@prisma/client");
-const { slackScheduleMsg } = require('./functions');
+const { slackScheduleMsg, postMessage, sleep } = require('./functions');
 const { createJob } = require("./database_action_handler");
 const { v4: uuidv4 } = require('uuid');
 const { jobStatus } = require("./types");
@@ -8,7 +8,7 @@ const { jobStatus } = require("./types");
 exports.JobsMapper = new Map();
 const prisma = new PrismaClient();
 
-exports.createTask = async (pattern_type, repeat_end_date, user, users, channels, conversations) => {
+exports.createTask = async ({pattern_type, repeat_end_date, user, users, channels, conversations}) => {
     const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type, repeat_end_date, user, users, channels, conversations });
     await this.addTask(job);
 }
@@ -29,16 +29,17 @@ exports.addTask = async (job) => {
     const cb = (job) => {
         if (job.conversations) {
             job.conversations.forEach((conversation) => {
-                slackScheduleMsg(conversation, job.message, job.date)
+                postMessage(conversation, job.message)
+                sleep
             })
         } else if (job.channels) {
             job.channels.forEach((channel) => {
-                slackScheduleMsg(channel, job.message, job.date)
+                postMessage(channel, job.message)
             })
         }
         else if (job.users) {
             job.users.forEach((user) => {
-                slackScheduleMsg(user, job.message, job.data)
+                postMessage(user, job.message)
             })
         }
     }

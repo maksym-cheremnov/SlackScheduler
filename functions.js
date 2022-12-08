@@ -1,5 +1,5 @@
-const { PrismaClient } = require("@prisma/client")
-
+const { PrismaClient } = require("@prisma/client");
+const { request } = require("undici");
 const now = new Date();
 const prisma = new PrismaClient();
 
@@ -27,6 +27,10 @@ exports.isToday = (dateVal) => {
         dateVal.getDate() == now.getDate()
     );
 };
+
+exports.sleep = ms => {
+    new Promise(r => setTimeout(r, ms));
+}
 
 exports.getCurrentDate = () => {
     return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -125,7 +129,7 @@ exports.getCustomDaysOptions = (needCustom) => {
     return options;
 };
 
-exports.slackScheduleMsg = async (channelId, messageText, execTime) => {
+exports.slackScheduleMsg = async (client, channelId, messageText, execTime) => {
     try {
         await client.chat.scheduleMessage({
             channel: channelId,
@@ -139,11 +143,36 @@ exports.slackScheduleMsg = async (channelId, messageText, execTime) => {
 }
 
 exports.customCronType = (arr) => {
-    const parsedArr = arr.sort(function(a,b) {return a - b});
+    const parsedArr = arr.sort((a, b) => { return a - b });
     let cronString = "0 0 * * ";
     parsedArr.map(val => {
         cronString += val + ',';
     })
     const parsedCron = cronString.slice(0, cronString.length - 1)
     return parsedCron
+}
+
+exports.postMessage = (channelId, messageText) => {
+    request(`https://slack.com/api/chat.postMessage?channel=${channelId}&as_user=true&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+}
+
+exports.sendSeveralMsg = (client, channelId, messageText, execTime, conversations, channels, users) => {
+    if (conversations) {
+        conversations.forEach((conversation) => {
+            this.slackScheduleMsg(client, conversation, messageText, execTime)
+            this.sleep(1000)
+        })
+    } else if (channels) {
+        channels.forEach((channel) => {
+            this.slackScheduleMsg(client, channel, messageText, execTime)
+            this.sleep(1000);
+        })
+    } else if (users) {
+        users.forEach((user) => {
+            this.slackScheduleMsg(client, user, messageText, execTime);
+            this.sleep(1000);
+        })
+    } else {
+        this.slackScheduleMsg(client, channelId, messageText, execTime);
+    }
 }
