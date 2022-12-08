@@ -6,10 +6,10 @@ const { validateScheduling } = require('./functions.js');
 const { getScheduledTimes, getScheduledPattern } = require('./date_planner.js');
 const modalView = require(('./modal_view_body.js'));
 const database = require(('./database_action_handler.js'));
-const { slackScheduleMsg, customCronType } = require('./functions');
+const { slackScheduleMsg, customCronType, sendSeveralMsg} = require('./functions');
 const prisma = new PrismaClient();
-const { createTask, cancelTask, addTask, restoreTasks } = require('./schedule.service.js');
-const {cron} = require("cron-validate")
+const { createTask, restoreTasks } = require('./schedule.service.js');
+const { cron } = require("cron-validate")
 const { cronTypes } = require("./types.js");
 
 const app = new App({
@@ -107,7 +107,7 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
     const viewValues = view.state.values;
     switch (viewValues.schedule_repeat.repeat_pattern.selected_option.value) {
       case "none":
-        //scheduleMessage
+        sendSeveralMsg(client, viewValues.)
         break;
       case "daily":
         createTask(cronTypes.daily, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
@@ -132,22 +132,21 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
       case "custom":
         const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
         const newCron = cron(customCron);
-        if(newCron.isValid()){
-          createTask(customCron, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
+        if (newCron.isValid()) {
+          createTask(newCron, viewValues.pattern_end.date_value.selected_date, user, viewValues.users.users_list.selected_users, viewValues.channels.channels_list.selected_channels, viewValues.conversations.conversations_list.selected_conversations);
         }
-        
+
         break;
 
     }
   } catch (err) {
     logger.error(err);
   }
-
 })
 
-// app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
-//   await ack();
-// });
+app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
+  await ack();
+});
 
 app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   await ack();
@@ -162,7 +161,6 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
     logger.error(error);
   }
 });
-
 
 // cron.schedule("* * 1 * *", async () => {
 scheduleJob("*/5 * * * *", async () => {
@@ -186,6 +184,6 @@ scheduleJob("*/5 * * * *", async () => {
 
 (async () => {
   await app.start();
-
+  await restoreTasks();
   console.log("⚡️ Slack app is running!");
 })();
