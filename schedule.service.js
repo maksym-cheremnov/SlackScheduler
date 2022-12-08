@@ -8,8 +8,8 @@ const { jobStatus } = require("./types");
 exports.JobsMapper = new Map();
 const prisma = new PrismaClient();
 
-exports.createTask = async ({pattern_type, repeat_end_date, user, users, channels, conversations}) => {
-    const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type, repeat_end_date, user, users, channels, conversations });
+exports.createTask = async (pattern_type, repeat_end_date, user, conversations, message) => {
+    const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type, repeat_end_date, user, conversations, message});
     await this.addTask(job);
 }
 
@@ -29,17 +29,8 @@ exports.addTask = async (job) => {
     const cb = (job) => {
         if (job.conversations) {
             job.conversations.forEach((conversation) => {
-                postMessage(conversation, job.message)
-                sleep
-            })
-        } else if (job.channels) {
-            job.channels.forEach((channel) => {
-                postMessage(channel, job.message)
-            })
-        }
-        else if (job.users) {
-            job.users.forEach((user) => {
-                postMessage(user, job.message)
+                postMessage(conversation, job.message);
+                sleep(1000);
             })
         }
     }

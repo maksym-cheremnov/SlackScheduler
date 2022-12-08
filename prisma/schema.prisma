@@ -30,8 +30,6 @@ model Job {
   date                 DateTime
   repeat_end_date      String
   user                 String
-  users                String[]
-  channels             String[]
   conversations        String[]
   status               String
   created_at           DateTime           @default(now())

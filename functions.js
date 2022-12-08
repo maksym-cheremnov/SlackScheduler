@@ -152,27 +152,26 @@ exports.customCronType = (arr) => {
     return parsedCron
 }
 
-exports.postMessage = (channelId, messageText) => {
-    request(`https://slack.com/api/chat.postMessage?channel=${channelId}&as_user=true&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+exports.postMessage = (channelId, messageText, execTime) => {
+    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${execTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
 }
 
-exports.sendSeveralMsg = (client, channelId, messageText, execTime, conversations, channels, users) => {
-    if (conversations) {
-        conversations.forEach((conversation) => {
-            this.slackScheduleMsg(client, conversation, messageText, execTime)
-            this.sleep(1000)
-        })
-    } else if (channels) {
-        channels.forEach((channel) => {
-            this.slackScheduleMsg(client, channel, messageText, execTime)
-            this.sleep(1000);
-        })
-    } else if (users) {
-        users.forEach((user) => {
-            this.slackScheduleMsg(client, user, messageText, execTime);
-            this.sleep(1000);
-        })
-    } else {
-        this.slackScheduleMsg(client, channelId, messageText, execTime);
-    }
+exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {
+    conversations.forEach((conversation) => {
+        this.slackScheduleMsg(client, conversation, messageText, execTime)
+        this.sleep(1000)
+    })
+}
+
+exports.getParsedTime = (viewValues) => {
+    const selected_date = new Date(viewValues.date.date_value.selected_date);
+    const selected_time = parseTime(viewValues.time.time_value.selected_time);
+    const firstSheduleEntry = new Date(selected_date);
+    firstSheduleEntry.setHours(
+        selected_time.getHours(),
+        selected_time.getMinutes(),
+        0,
+        0
+    );
+    return firstSheduleEntry
 }

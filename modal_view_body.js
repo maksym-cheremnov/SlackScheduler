@@ -271,44 +271,44 @@ function createCustomDaysSelector(selectedPattern, blocks) {
 }
 
 function createRecepientBlock(blocks) {
-    blocks.push({
-        type: "input",
-        optional: true,
-        block_id: "users",
-        element: {
-            type: "multi_users_select",
-            placeholder: {
-                type: "plain_text",
-                text: "Select users",
-                emoji: true,
-            },
-            action_id: "users_list",
-        },
-        label: {
-            type: "plain_text",
-            text: "User",
-            emoji: true,
-        },
-    });
-    blocks.push({
-        type: "input",
-        optional: true,
-        block_id: "channels",
-        element: {
-            type: "multi_channels_select",
-            placeholder: {
-                type: "plain_text",
-                text: "Select channels",
-                emoji: true,
-            },
-            action_id: "channels_list",
-        },
-        label: {
-            type: "plain_text",
-            text: "Channels",
-            emoji: true,
-        },
-    });
+    // blocks.push({
+    //     type: "input",
+    //     optional: true,
+    //     block_id: "users",
+    //     element: {
+    //         type: "multi_users_select",
+    //         placeholder: {
+    //             type: "plain_text",
+    //             text: "Select users",
+    //             emoji: true,
+    //         },
+    //         action_id: "users_list",
+    //     },
+    //     label: {
+    //         type: "plain_text",
+    //         text: "User",
+    //         emoji: true,
+    //     },
+    // });
+    // blocks.push({
+    //     type: "input",
+    //     optional: true,
+    //     block_id: "channels",
+    //     element: {
+    //         type: "multi_channels_select",
+    //         placeholder: {
+    //             type: "plain_text",
+    //             text: "Select channels",
+    //             emoji: true,
+    //         },
+    //         action_id: "channels_list",
+    //     },
+    //     label: {
+    //         type: "plain_text",
+    //         text: "Channels",
+    //         emoji: true,
+    //     },
+    // });
     blocks.push({
         type: "input",
         block_id: "conversations",
