@@ -66,6 +66,7 @@ exports.clearAndUpdateOutdatedMessages = async (prisma) => {
     // }
 };
 
-exports.createJob = (job) => {
-    prisma.job.create(job);
+exports.createJob = async (job) => {
+    const newJob = await prisma.job.create(job);
+    console.log(newJob);
 }
