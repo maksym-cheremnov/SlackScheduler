@@ -1,4 +1,5 @@
 require("dotenv").config();
+const { prisma } = require("@prisma/client");
 const { App } = require("@slack/bolt");
 const { CreateScheduledMessagesView } = require(('./schedule_message_body.js'));
 
@@ -27,14 +28,22 @@ bot.event("app_home_opened", async ({ payload, client }) => {
     }
 });
 
-// bot.action('message_action', async ({ payload, client }) => {
-//     try {
-//       // Update || delete job in database
-//       payload.
-//     } catch (error) {
-//         logger.error(error);
-//     }
-// });
+bot.action('message_action', async ({ payload, client }) => {
+    try {
+        console.log(payload.value)
+        if (payload.value) {
+            const deletedJob = prisma.job.delete({
+                where: {
+                    job_id: payload.value
+                }
+            })
+            console.log(deletedJob.toString());
+        } else console.log('Something went wrong')
+
+    } catch (error) {
+        logger.error(error);
+    }
+});
 
 (async () => {
     await bot.start();
