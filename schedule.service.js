@@ -1,6 +1,6 @@
 const { scheduleJob } = require("node-schedule");
 const { PrismaClient } = require("@prisma/client");
-const { slackScheduleMsg, postMessage, sleep } = require('./functions');
+const { postMessage, sleep } = require('./functions');
 const { createJob } = require("./database_action_handler");
 const { v4: uuidv4 } = require('uuid');
 const { jobStatus } = require("./types");
@@ -8,8 +8,8 @@ const { jobStatus } = require("./types");
 exports.JobsMapper = new Map();
 const prisma = new PrismaClient();
 
-exports.createTask = async ({pattern_type, repeat_end_date, user, conversations, message}) => {
-    const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type, repeat_end_date, user, conversations, message});
+exports.createTask = async ({ pattern_type, repeat_end_date, user, conversations, message }) => {
+    const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type: pattern_type, repeat_end_date: repeat_end_date, user: user, conversations: conversations, message: message });
     await this.addTask(job);
 }
 

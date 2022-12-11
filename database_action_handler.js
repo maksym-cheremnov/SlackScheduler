@@ -67,5 +67,5 @@ exports.clearAndUpdateOutdatedMessages = async (prisma) => {
 };
 
 exports.createJob = (job) => {
-   return prisma.job.create(job);
+    prisma.job.create(job);
 }
