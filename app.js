@@ -6,7 +6,7 @@ const { validateScheduling } = require('./functions.js');
 const { getScheduledTimes, getScheduledPattern } = require('./date_planner.js');
 const modalView = require(('./modal_view_body.js'));
 const database = require(('./database_action_handler.js'));
-const { customCronType, sendSeveralMsg, getParsedTime} = require('./functions');
+const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions');
 const prisma = new PrismaClient();
 const { createTask, restoreTasks } = require('./schedule.service.js');
 const { cron } = require("cron-validate")
@@ -111,30 +111,30 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
         sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value, post_at);
         break;
       case "daily":
-        createTask(cronTypes.daily, viewValues.pattern_end.date_value.selected_date, user,  viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+        createTask({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         break;
 
       case "weekDay":
-        createTask(cronTypes.weekDay, viewValues.pattern_end.date_value.selected_date, user, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+        createTask({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         break;
 
       case "weelky":
-        createTask(cronTypes.weelky, viewValues.pattern_end.date_value.selected_date, user, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+        createTask({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         break;
 
       case "onceTwoWeeks":
-        createTask(cronTypes.onceTwoWeeks, viewValues.pattern_end.date_value.selected_date, user, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+        createTask({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         break;
 
       case "monthly":
-        createTask(cronTypes.monthly, viewValues.pattern_end.date_value.selected_date, user,viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+        createTask({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         break;
 
       case "custom":
         const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
         const newCron = cron(customCron);
         if (newCron.isValid()) {
-          createTask(newCron, viewValues.pattern_end.date_value.selected_date, user, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value);
+          createTask({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
         }
 
         break;

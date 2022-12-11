@@ -161,7 +161,7 @@ exports.postMessage = (channelId, messageText, execTime) => {
 exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {
     conversations.forEach((conversation) => {
         this.slackScheduleMsg(client, conversation, messageText, execTime)
-        // this.sleep(1000)
+        this.sleep(1000)
     })
 }
 
