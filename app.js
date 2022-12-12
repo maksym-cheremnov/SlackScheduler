@@ -105,36 +105,37 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
     await ack();
     const user = body.user.id;
     const viewValues = view.state.values;
+    const post_at = getParsedTime(viewValues);
+
     switch (viewValues.schedule_repeat.repeat_pattern.selected_option.value) {
       case "none":
-        const post_at = getParsedTime(viewValues);
         sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.message.message_text.value, post_at.getTime());
         break;
       case "daily":
-        createTask({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+        createTask({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "weekDay":
-        createTask({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+        createTask({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "weelky":
-        createTask({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+        createTask({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "onceTwoWeeks":
-        createTask({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+        createTask({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "monthly":
-        createTask({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+        createTask({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "custom":
         const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
         const newCron = cron(customCron);
         if (newCron.isValid()) {
-          createTask({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value });
+          createTask({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         }
 
         break;

@@ -69,7 +69,7 @@ exports.clearAndUpdateOutdatedMessages = async (prisma) => {
 };
 
 exports.createJob = async (job) => {
-    const newJob = await prisma.job.create({ job_id: uuidv4(), status: jobStatus.ACTIVE, message: job.message, pattern_type: job.pattern_type, repeat_end_date: job.repeat_end_date, date: job.date, user: job.user, conversations: job.conversations });
+    const newJob = await prisma.job.create({ data: { job_id: uuidv4(), status: jobStatus.ACTIVE, message: job.message, pattern_type: job.pattern_type, repeat_end_date: job.repeat_end_date, date: job.date, user: job.user, conversations: job.conversations } });
     console.log(newJob);
 
     return newJob
