@@ -90,7 +90,7 @@ exports.createScheduledMsgs = async (client, channel_id, text) => {
 
 exports.extractMessageFromDatabase = async (userId) => {
     const time = new Date();
-    const messages = await prisma.schedule.findMany({
+    const messages = await prisma.job.findMany({
         where: {
             date: {
                 lte: time,
@@ -154,8 +154,8 @@ exports.customCronType = (arr) => {
 }
 
 exports.postMessage = (channelId, messageText, execTime) => {
-    const parseTime = execTime.getTime() / 1000
-    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parseTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+    const parsedTime = execTime.getTime() / 1000
+    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parsedTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
 }
 
 exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {

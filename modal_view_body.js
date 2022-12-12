@@ -174,7 +174,7 @@ function setDateTimeOption(selectedPattern, blocks) {
         blocks.push({
             type: "input",
             block_id: "pattern_end",
-            optional: true,
+            optional: false,
             element: {
                 type: "datepicker",
                 placeholder: {

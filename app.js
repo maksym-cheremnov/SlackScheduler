@@ -5,7 +5,7 @@ const { PrismaClient } = require("@prisma/client");
 const { validateScheduling } = require('./functions.js');
 const { getScheduledTimes, getScheduledPattern } = require('./date_planner.js');
 const modalView = require(('./modal_view_body.js'));
-const database = require(('./database_action_handler.js'));
+const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
 const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions');
 const prisma = new PrismaClient();
 const { createTask, restoreTasks } = require('./schedule.service.js');
@@ -108,7 +108,8 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
     switch (viewValues.schedule_repeat.repeat_pattern.selected_option.value) {
       case "none":
         const post_at = getParsedTime(viewValues);
-        sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value, post_at);
+        console.log(post_at)
+        // sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.messages.message_text.value, post_at);
         break;
       case "daily":
         createTask({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.messages.message_text.value });
@@ -166,7 +167,7 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
 // cron.schedule("* * 1 * *", async () => {
 scheduleJob("*/5 * * * *", async () => {
   try {
-    await database.clearAndUpdateOutdatedMessages(prisma);
+    await clearAndUpdateOutdatedMessages(prisma);
     const time = new Date();
     const messages = await prisma.schedule.findMany({
       where: {
