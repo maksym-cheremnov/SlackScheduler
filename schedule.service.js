@@ -2,20 +2,21 @@ const { scheduleJob } = require("node-schedule");
 const { PrismaClient } = require("@prisma/client");
 const { postMessage, sleep } = require('./functions');
 const { createJob } = require("./database_action_handler");
-const { v4: uuidv4 } = require('uuid');
 const { jobStatus } = require("./types");
 
 exports.JobsMapper = new Map();
 const prisma = new PrismaClient();
 
-exports.createTask = async ({ pattern_type, repeat_end_date, user, conversations, message }) => {
-    const job = await createJob({ job_id: uuidv4(), status: jobStatus.ACTIVE, pattern_type: pattern_type, repeat_end_date: repeat_end_date, user: user, conversations: conversations, message: message });
+
+//TODO add time to process
+exports.createTask = async (data) => {
+    const job = await createJob(data);
     await this.addTask(job);
 }
 
-exports.cancelTask = (job_id) => {
+exports.cancelTask = async (job_id) => {
     this.cancelSchedule(job_id);
-    prisma.job.update({
+    await prisma.job.update({
         where: {
             job_id: job_id
         }, data: {
@@ -29,7 +30,7 @@ exports.addTask = async (job) => {
     const cb = (job) => {
         if (job.conversations) {
             job.conversations.forEach((conversation) => {
-                postMessage(conversation, job.message);
+                postMessage(conversation, job.message, job.time);
                 sleep(1000);
             })
         }

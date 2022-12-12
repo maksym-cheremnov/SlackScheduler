@@ -1,5 +1,7 @@
-const {PrismaClient} = require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const { v4: uuidv4 } = require('uuid');
+const { jobStatus } = require("./types");
 
 exports.clearAndUpdateOutdatedMessages = async (prisma) => {
     const now = new Date();
@@ -67,6 +69,8 @@ exports.clearAndUpdateOutdatedMessages = async (prisma) => {
 };
 
 exports.createJob = async (job) => {
-    const newJob = await prisma.job.create(job);
+    const newJob = await prisma.job.create({ job_id: uuidv4(), status: jobStatus.ACTIVE, message: job.message, pattern_type: job.pattern_type, repeat_end_date: job.repeat_end_date, date: job.date, user: job.user, conversations: job.conversations });
     console.log(newJob);
+
+    return newJob
 }

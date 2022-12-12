@@ -135,7 +135,7 @@ exports.slackScheduleMsg = async (client, channelId, messageText, execTime) => {
         await client.chat.scheduleMessage({
             channel: channelId,
             text: messageText,
-            post_at: execTime.getTime() / 1000,
+            post_at: execTime / 1000,
             as_user: true
         });
     } catch (error) {
