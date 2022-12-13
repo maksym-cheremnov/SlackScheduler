@@ -24,9 +24,9 @@ function createHeader(blocks) {
     });
 }
 
-createScheduledMsgInfo = async (blocks, userId) => {
+async function createScheduledMsgInfo(blocks, userId){
     const messages = await extractMessageFromDatabase(userId);
-    messages.forEach(({ date, conversations, message, id }) => {
+    messages.forEach(({ date, conversations, message, job_id }) => {
         blocks.push({
             type: "section",
             text: {
@@ -36,29 +36,29 @@ createScheduledMsgInfo = async (blocks, userId) => {
             accessory: {
                 type: "overflow",
                 options: [
-                    {
-                        text: {
-                            type: "plain_text",
-                            text: "View",
-                            emoji: true,
-                        },
-                        value: "view " + id,
-                    },
-                    {
-                        text: {
-                            type: "plain_text",
-                            text: "Edit",
-                            emoji: true,
-                        },
-                        value: "edit " + id ,
-                    },
+                    // {
+                    //     text: {
+                    //         type: "plain_text",
+                    //         text: "View",
+                    //         emoji: true,
+                    //     },
+                    //     value: "view " + id,
+                    // },
+                    // {
+                    //     text: {
+                    //         type: "plain_text",
+                    //         text: "Edit",
+                    //         emoji: true,
+                    //     },
+                    //     value: "edit " + id,
+                    // },
                     {
                         text: {
                             type: "plain_text",
                             text: "Delete",
                             emoji: true,
                         },
-                        value: "delete " + id,
+                        value: job_id,
                     },
                 ],
                 action_id: "message_action",

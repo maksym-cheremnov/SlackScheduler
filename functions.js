@@ -1,5 +1,6 @@
-const { PrismaClient } = require("@prisma/client")
-
+const { PrismaClient } = require("@prisma/client");
+const { request } = require("undici");
+const { parseTime } = require("./date_planner");
 const now = new Date();
 const prisma = new PrismaClient();
 
@@ -27,6 +28,10 @@ exports.isToday = (dateVal) => {
         dateVal.getDate() == now.getDate()
     );
 };
+
+exports.sleep = ms => {
+    new Promise(r => setTimeout(r, ms));
+}
 
 exports.getCurrentDate = () => {
     return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
@@ -85,7 +90,7 @@ exports.createScheduledMsgs = async (client, channel_id, text) => {
 
 exports.extractMessageFromDatabase = async (userId) => {
     const time = new Date();
-    const messages = await prisma.schedule.findMany({
+    const messages = await prisma.job.findMany({
         where: {
             date: {
                 lte: time,
@@ -125,12 +130,12 @@ exports.getCustomDaysOptions = (needCustom) => {
     return options;
 };
 
-exports.slackScheduleMsg = async (channelId, messageText, execTime) => {
+exports.slackScheduleMsg = async (client, channelId, messageText, execTime) => {
     try {
         await client.chat.scheduleMessage({
             channel: channelId,
             text: messageText,
-            post_at: execTime.getTime() / 1000,
+            post_at: execTime / 1000,
             as_user: true
         });
     } catch (error) {
@@ -139,11 +144,36 @@ exports.slackScheduleMsg = async (channelId, messageText, execTime) => {
 }
 
 exports.customCronType = (arr) => {
+    const parsedArr = arr.sort((a, b) => { return a - b });
     let cronString = "0 0 * * ";
-    arr.map(val => {
+    parsedArr.map(val => {
         cronString += val + ',';
     })
-
     const parsedCron = cronString.slice(0, cronString.length - 1)
     return parsedCron
+}
+
+exports.postMessage = (channelId, messageText, execTime) => {
+    const parsedTime = execTime.getTime() / 1000
+    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parsedTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+}
+
+exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {
+    conversations.forEach((conversation) => {
+        this.slackScheduleMsg(client, conversation, messageText, execTime)
+        this.sleep(1000)
+    })
+}
+
+exports.getParsedTime = (viewValues) => {
+    const selected_date = new Date(viewValues.date.date_value.selected_date);
+    const selected_time = parseTime(viewValues.time.time_value.selected_time);
+    const firstSheduleEntry = new Date(selected_date);
+    firstSheduleEntry.setHours(
+        selected_time.getHours(),
+        selected_time.getMinutes(),
+        0,
+        0
+    );
+    return firstSheduleEntry
 }

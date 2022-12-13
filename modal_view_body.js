@@ -174,7 +174,7 @@ function setDateTimeOption(selectedPattern, blocks) {
         blocks.push({
             type: "input",
             block_id: "pattern_end",
-            optional: true,
+            optional: false,
             element: {
                 type: "datepicker",
                 placeholder: {
@@ -215,49 +215,49 @@ function createCustomDaysSelector(selectedPattern, blocks) {
                 },
                 options: [
                     {
-                        value: "0",
+                        value: "1",
                         text: {
                             type: "plain_text",
                             text: "Monday",
                         },
                     },
                     {
-                        value: "1",
+                        value: "2",
                         text: {
                             type: "plain_text",
                             text: "Tuesday",
                         },
                     },
                     {
-                        value: "2",
+                        value: "3",
                         text: {
                             type: "plain_text",
                             text: "Wednesday",
                         },
                     },
                     {
-                        value: "3",
+                        value: "4",
                         text: {
                             type: "plain_text",
                             text: "Thursday",
                         },
                     },
                     {
-                        value: "4",
+                        value: "5",
                         text: {
                             type: "plain_text",
                             text: "Friday",
                         },
                     },
                     {
-                        value: "5",
+                        value: "6",
                         text: {
                             type: "plain_text",
                             text: "Saturday",
                         },
                     },
                     {
-                        value: "6",
+                        value: "7",
                         text: {
                             type: "plain_text",
                             text: "Sunday",
@@ -271,44 +271,44 @@ function createCustomDaysSelector(selectedPattern, blocks) {
 }
 
 function createRecepientBlock(blocks) {
-    blocks.push({
-        type: "input",
-        optional: true,
-        block_id: "users",
-        element: {
-            type: "multi_users_select",
-            placeholder: {
-                type: "plain_text",
-                text: "Select users",
-                emoji: true,
-            },
-            action_id: "users_list",
-        },
-        label: {
-            type: "plain_text",
-            text: "User",
-            emoji: true,
-        },
-    });
-    blocks.push({
-        type: "input",
-        optional: true,
-        block_id: "channels",
-        element: {
-            type: "multi_channels_select",
-            placeholder: {
-                type: "plain_text",
-                text: "Select channels",
-                emoji: true,
-            },
-            action_id: "channels_list",
-        },
-        label: {
-            type: "plain_text",
-            text: "Channels",
-            emoji: true,
-        },
-    });
+    // blocks.push({
+    //     type: "input",
+    //     optional: true,
+    //     block_id: "users",
+    //     element: {
+    //         type: "multi_users_select",
+    //         placeholder: {
+    //             type: "plain_text",
+    //             text: "Select users",
+    //             emoji: true,
+    //         },
+    //         action_id: "users_list",
+    //     },
+    //     label: {
+    //         type: "plain_text",
+    //         text: "User",
+    //         emoji: true,
+    //     },
+    // });
+    // blocks.push({
+    //     type: "input",
+    //     optional: true,
+    //     block_id: "channels",
+    //     element: {
+    //         type: "multi_channels_select",
+    //         placeholder: {
+    //             type: "plain_text",
+    //             text: "Select channels",
+    //             emoji: true,
+    //         },
+    //         action_id: "channels_list",
+    //     },
+    //     label: {
+    //         type: "plain_text",
+    //         text: "Channels",
+    //         emoji: true,
+    //     },
+    // });
     blocks.push({
         type: "input",
         block_id: "conversations",

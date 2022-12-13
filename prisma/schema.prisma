@@ -27,11 +27,9 @@ model Job {
   job_id               String
   message              String
   pattern_type         String
-  date                 DateTime
+  date                 DateTime   @db.Timestamptz(3)
   repeat_end_date      String
   user                 String
-  users                String[]
-  channels             String[]
   conversations        String[]
   status               String
   created_at           DateTime           @default(now())
