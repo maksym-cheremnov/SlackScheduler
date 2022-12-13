@@ -164,7 +164,15 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   }
 });
 
-// cron.schedule("* * 1 * *", async () => {
+scheduleJob("* * 1 * *", async () => {
+  try{
+    
+  }catch(error) {
+    console.log(error);
+  }
+});
+
+
 scheduleJob("*/5 * * * *", async () => {
   try {
     await clearAndUpdateOutdatedMessages(prisma);

@@ -4,11 +4,10 @@ const { postMessage, sleep } = require('./functions');
 const { createJob } = require("./database_action_handler");
 const { jobStatus } = require("./types");
 
-exports.JobsMapper = new Map();
+const JobsMapper = new Map();
 const prisma = new PrismaClient();
 
 
-//TODO add time to process
 exports.createTask = async (data) => {
     const job = await createJob(data);
     await this.addTask(job);
@@ -27,40 +26,51 @@ exports.cancelTask = async (job_id) => {
 }
 
 exports.addTask = async (job) => {
-    const cb = (job) => {
-        if (job.conversations) {
-            job.conversations.forEach((conversation) => {
-                postMessage(conversation, job.message, job.time);
-                sleep(1000);
-            })
+    try {
+        const cb = (job) => {
+            if (job.conversations) {
+                job.conversations.map((conversation) => {
+                    postMessage(conversation, job.message, job.date);
+                    sleep(1000);
+                })
+            }
         }
+
+        this.newSchedule(job.pattern_type, job.job_id, () => { return cb(job) })
+
+    } catch (error) {
+        console.log(error)
     }
 
-    this.newSchedule(job.pattern_type, job.job_id, () => { return cb(job) })
 }
 
 exports.restoreTasks = async () => {
-    const jobs = await prisma.job.findMany({
-        where: {
-            status: jobStatus.ACTIVE
-        }
-    })
+    try {
+        const jobs = await prisma.job.findMany({
+            where: {
+                status: jobStatus.ACTIVE
+            }
+        })
 
-    jobs.forEach(job => {
-        if (job.status === jobStatus.ACTIVE && job.repeat_end_date > new Date()) {
-            this.addTask(job);
-        }
-    })
+        jobs.forEach(job => {
+            if (job.status === jobStatus.ACTIVE && job.repeat_end_date > new Date()) {
+                this.addTask(job);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+    }
+
 }
 
 exports.newSchedule = (time, id, cb) => {
     const job = scheduleJob(time, cb);
-    this.JobsMapper.set(id, job);
+    JobsMapper.set(id, job);
 }
 
 exports.cancelSchedule = (uuid) => {
-    if (this.JobsMapper.has(uuid)) {
-        this.JobsMapper.get(uuid).cancel();
-        this.JobsMapper.delete(uuid);
-    }
+    if (JobsMapper.has(uuid)) {
+        JobsMapper.get(uuid).cancel();
+        JobsMapper.delete(uuid);
+    } else console.log("Something went wrong on cancel job with id :" + uuid);
 }
