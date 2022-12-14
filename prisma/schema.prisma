@@ -7,21 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Schedule {
-  id                   Int      @id @default(autoincrement())
-  scheduled_ids        String[]
-  message              String
-  date                 DateTime
-  isRepeated           Boolean
-  repeat_pattern       String
-  repeat_custom_days   String[] @default([])
-  repeat_end_date      String
-  user                 String
-  users                String[]
-  channels             String[]
-  conversations        String[]
-}
-
 model Job {
   id                   Int      @id @default(autoincrement())
   job_id               String
