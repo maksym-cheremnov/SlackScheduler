@@ -1,0 +1,117 @@
+name: Deploy to Amazon ECS
+
+on:
+  push:
+    branches: [ "pipeline_testing" ]
+
+env:
+  AWS_REGION: eu-north-1                  
+  ECR_REPOSITORY_APP: slackscheduler-app 
+  ECR_REPOSITORY_BOT: slackscheduler-bot
+  ECS_SERVICE_APP: SlackScheduler-app-svc    
+  ECS_SERVICE_BOT: SlackScheduler-bot-svc  
+  ECS_CLUSTER: SlackSchedulerCluster                
+  ECS_TASK_DEFINITION_APP: .aws/task-definition-app.json
+  ECS_TASK_DEFINITION_BOT: .aws/task-definition-bot.json
+  CONTAINER_NAME_APP: SlackScheduler-app-cont                                           
+  CONTAINER_NAME_BOT: SlackScheduler-bot-cont           
+
+permissions:
+  contents: read
+
+jobs:
+ migrate:
+     runs-on: ubuntu-latest
+     steps:
+      - uses: actions/checkout@v2
+      - name: Run production migration
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
+ deploy_app:
+    name: Deploy_app
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_APP:$IMAGE_TAG"
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION_APP }}
+        container-name: ${{ env.CONTAINER_NAME_APP }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE_APP }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true  
+        
+ deploy_bot:
+    name: Deploy_bot
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: ${{ github.sha }}
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BOT:$IMAGE_TAG .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_BOT:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY_BOT:$IMAGE_TAG"
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: ${{ env.ECS_TASK_DEFINITION_BOT }}
+        container-name: ${{ env.CONTAINER_NAME_BOT }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE_BOT }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true  
