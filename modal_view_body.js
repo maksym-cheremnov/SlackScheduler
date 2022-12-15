@@ -1,4 +1,4 @@
-const func = require("./Functions.js");
+const func = require("./functions.js");
 exports.CreateModalView = (metadata = "", pattern = "none") => {
     let blocks = [];
     createMessageBlock(blocks);
