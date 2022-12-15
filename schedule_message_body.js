@@ -1,4 +1,4 @@
-const { extractMessageFromDatabase } = require("./Functions.js");
+const { extractMessageFromDatabase } = require("./functions.js");
 
 exports.CreateScheduledMessagesView = async (userId) => {
     let blocks = [];

@@ -1,6 +1,6 @@
 FROM node:16.17-alpine 
  
-WORKDIR .
+WORKDIR /
  
 COPY . . 
 RUN npm install
