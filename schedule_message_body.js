@@ -24,7 +24,7 @@ function createHeader(blocks) {
     });
 }
 function parseProperCron(value) {
-    return Object.entries(cronTypes).find(([key, val]) => value === val)[0];
+    return Object.entries(cronTypes).find(([_, val]) => value === val)[0];
 }
 async function createScheduledMsgInfo(blocks, userId) {
     const messages = await extractMessageFromDatabase(userId);
@@ -60,7 +60,7 @@ async function createScheduledMsgInfo(blocks, userId) {
                             text: "Delete",
                             emoji: true,
                         },
-                        value: `${id} , ${job_id}`,
+                        value: `${id},${job_id}`,
                     },
                 ],
                 action_id: "message_action",

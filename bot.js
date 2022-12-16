@@ -32,11 +32,12 @@ bot.event("app_home_opened", async ({ payload, client }) => {
 bot.action('message_action', async ({ payload, logger }) => {
     try {
         const jobId = payload.selected_option.value;
+        const parsedStringArr = jobId.split(',');
         if (jobId) {
             console.log(jobId.toString())
             console.log("Everything fine");
-            // const cancelJob = await cancelTask(jobId);
-            // console.log(cancelJob.toString());
+            const cancelJob = await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
+            console.log(cancelJob.toString());
         } else console.log('Something went wrong')
 
     } catch (error) {
