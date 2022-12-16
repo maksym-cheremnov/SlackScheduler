@@ -1,7 +1,7 @@
 require("dotenv").config();
 const { prisma } = require("@prisma/client");
 const { App } = require("@slack/bolt");
-const { CreateScheduledMessagesView } = require(('./schedule_message_body.js'));
+const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
 const { cancelTask } = require("./schedule.service");
 
 const bot = new App({
@@ -29,12 +29,14 @@ bot.event("app_home_opened", async ({ payload, client }) => {
     }
 });
 
-bot.action('message_action', async ({ payload }) => {
+bot.action('message_action', async ({ payload, logger }) => {
     try {
-        console.log(payload.value)
-        if (payload.value) {
-            const cancelJob = cancelTask(payload.value);
-            console.log(cancelJob.toString());
+        const jobId = payload.selected_option.value;
+        if (jobId) {
+            console.log(jobId.toString())
+            console.log("Everything fine");
+            // const cancelJob = await cancelTask(jobId);
+            // console.log(cancelJob.toString());
         } else console.log('Something went wrong')
 
     } catch (error) {

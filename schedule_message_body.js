@@ -24,14 +24,14 @@ function createHeader(blocks) {
     });
 }
 
-async function createScheduledMsgInfo(blocks, userId){
+async function createScheduledMsgInfo(blocks, userId) {
     const messages = await extractMessageFromDatabase(userId);
-    messages.forEach(({ date, conversations, message, job_id }) => {
+    messages.forEach(({ date, conversations, message, id, job_id }) => {
         blocks.push({
             type: "section",
             text: {
                 type: "mrkdwn",
-                text: `*${date}*\nMessage scheduled to conversations: ${conversations.join(',')}\nMessage text:${message}`,
+                text: `*${date.toUTCString()}*\n Message scheduled to conversations: ${conversations.join(',')}\n Message filled: ${message}`,
             },
             accessory: {
                 type: "overflow",
@@ -58,7 +58,7 @@ async function createScheduledMsgInfo(blocks, userId){
                             text: "Delete",
                             emoji: true,
                         },
-                        value: job_id,
+                        value: `${id} , ${job_id}`,
                     },
                 ],
                 action_id: "message_action",

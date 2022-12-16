@@ -7,22 +7,28 @@ const { jobStatus } = require("./types");
 const JobsMapper = new Map();
 const prisma = new PrismaClient();
 
+exports.restoreTasks = async () => {
+    try {
+        const jobs = await prisma.job.findMany({
+            where: {
+                status: jobStatus.ACTIVE
+            }
+        })
+        if (jobs.length) {
+            jobs.forEach(job => {
+                if (job.status === jobStatus.ACTIVE && job.repeat_end_date > new Date()) {
+                    this.addTask(job);
+                }
+            });
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 exports.createTask = async (data) => {
     const job = await createJob(data);
     await this.addTask(job);
-}
-
-exports.cancelTask = async (job_id) => {
-    this.cancelSchedule(job_id);
-    await prisma.job.update({
-        where: {
-            job_id: job_id
-        }, data: {
-            status: jobStatus.CANCEL,
-        }
-    })
-
 }
 
 exports.addTask = async (job) => {
@@ -50,22 +56,15 @@ exports.addTask = async (job) => {
 
 }
 
-exports.restoreTasks = async () => {
-    try {
-        const jobs = await prisma.job.findMany({
-            where: {
-                status: jobStatus.ACTIVE
-            }
-        })
-
-        jobs.forEach(job => {
-            if (job.status === jobStatus.ACTIVE && job.repeat_end_date > new Date()) {
-                this.addTask(job);
-            }
-        });
-    } catch (error) {
-        console.log(error);
-    }
+exports.cancelTask = async (id) => {
+    this.cancelSchedule(id);
+    await prisma.job.update({
+        where: {
+            job_id: id
+        }, data: {
+            status: jobStatus.CANCEL,
+        }
+    })
 
 }
 
@@ -76,7 +75,7 @@ exports.newSchedule = (time, id, cb) => {
 
 exports.cancelSchedule = (uuid) => {
     if (JobsMapper.has(uuid)) {
-        JobsMapper.get(uuid).cancel();
+        JobsMapper.get(uuid);
         JobsMapper.delete(uuid);
     } else console.log("Something went wrong on cancel job with id :" + uuid);
 }
