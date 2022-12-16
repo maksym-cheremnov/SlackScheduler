@@ -23,8 +23,8 @@ function createHeader(blocks) {
         type: "divider",
     });
 }
-function parseProperCron(val) {
-    return Object.entries(cronTypes).find(([_, val]) => data === val)[0];
+function parseProperCron(value) {
+    return Object.entries(cronTypes).find(([key, val]) => value === val)[0];
 }
 async function createScheduledMsgInfo(blocks, userId) {
     const messages = await extractMessageFromDatabase(userId);
