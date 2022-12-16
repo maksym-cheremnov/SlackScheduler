@@ -11,6 +11,7 @@ const prisma = new PrismaClient();
 exports.createTask = async (data) => {
     const job = await createJob(data);
     await this.addTask(job);
+    await this.
 }
 
 exports.cancelTask = async (job_id) => {
@@ -32,8 +33,8 @@ exports.addTask = async (job) => {
             const now = new Date();
             now.setHours(jobDate.getHours());
             now.setMinutes(jobDate.getMinutes());
-            now.setSeconds(0)
-            now.setMilliseconds(0)
+            now.setSeconds(0);
+            now.setMilliseconds(0);
             if (job.conversations) {
                 job.conversations.map((conversation) => {
                     postMessage(conversation, job.message, now);
