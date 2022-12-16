@@ -13,8 +13,8 @@ env:
   ECS_CLUSTER: SlackSchedulerCluster                
   ECS_TASK_DEFINITION_APP: .aws/task-definition-app.json
   ECS_TASK_DEFINITION_BOT: .aws/task-definition-bot.json
-  CONTAINER_NAME_APP: SlackScheduler-app-cont                                           
-  CONTAINER_NAME_BOT: SlackScheduler-bot-cont           
+  CONTAINER_NAME_APP: slackscheduler-app-cont                                           
+  CONTAINER_NAME_BOT: slackscheduler-bot-cont           
 
 permissions:
   contents: read
