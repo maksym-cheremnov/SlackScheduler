@@ -1,5 +1,5 @@
 const { extractMessageFromDatabase } = require("./functions.js");
-
+const { cronTypes } = require('./types');
 exports.CreateScheduledMessagesView = async (userId) => {
     let blocks = [];
     createHeader(blocks);
@@ -23,15 +23,17 @@ function createHeader(blocks) {
         type: "divider",
     });
 }
-
+function parseProperCron(val) {
+    return Object.entries(cronTypes).find(([_, val]) => data === val)[0];
+}
 async function createScheduledMsgInfo(blocks, userId) {
     const messages = await extractMessageFromDatabase(userId);
-    messages.forEach(({ date, conversations, message, id, job_id }) => {
+    messages.forEach(({ date, conversations, message, id, job_id, pattern_type }) => {
         blocks.push({
             type: "section",
             text: {
                 type: "mrkdwn",
-                text: `*${date.toUTCString()}*\n Message scheduled to conversations: ${conversations.join(',')}\n Message filled: ${message}`,
+                text: `Scheduled time: *${date.toLocaleTimeString()}*\n Scheduled pattern: ${parseProperCron(pattern_type)} \nMessage scheduled to conversations: ${conversations.join(',')}\n Message filled: ${message}`,
             },
             accessory: {
                 type: "overflow",
