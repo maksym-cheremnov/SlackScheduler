@@ -271,6 +271,24 @@ function createCustomDaysSelector(selectedPattern, blocks) {
 }
 
 function createRecepientBlock(blocks) {
+    blocks.push({
+        type: "input",
+        block_id: "conversations",
+        element: {
+            type: "multi_conversations_select",
+            default_to_current_conversation: true,
+            placeholder: {
+                type: "plain_text",
+                text: "Select conversations",
+                emoji: true,
+            },
+            action_id: "conversations_list",
+        },
+        label: {
+            type: "plain_text",
+            text: "Conversations",
+            emoji: true,
+        },
     // blocks.push({
     //     type: "input",
     //     optional: true,
@@ -309,23 +327,5 @@ function createRecepientBlock(blocks) {
     //         emoji: true,
     //     },
     // });
-    blocks.push({
-        type: "input",
-        block_id: "conversations",
-        element: {
-            type: "multi_conversations_select",
-            default_to_current_conversation: true,
-            placeholder: {
-                type: "plain_text",
-                text: "Select conversations",
-                emoji: true,
-            },
-            action_id: "conversations_list",
-        },
-        label: {
-            type: "plain_text",
-            text: "Conversations",
-            emoji: true,
-        },
     });
 }
