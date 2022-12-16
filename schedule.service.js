@@ -11,7 +11,6 @@ const prisma = new PrismaClient();
 exports.createTask = async (data) => {
     const job = await createJob(data);
     await this.addTask(job);
-    await this.
 }
 
 exports.cancelTask = async (job_id) => {
