@@ -164,33 +164,33 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   }
 });
 
-scheduleJob("* * 1 * *", async () => {
-  try{
+// scheduleJob("* * 1 * *", async () => {
+//   try{
     
-  }catch(error) {
-    console.log(error);
-  }
-});
+//   }catch(error) {
+//     console.log(error);
+//   }
+// });
 
 
-scheduleJob("*/5 * * * *", async () => {
-  try {
-    await clearAndUpdateOutdatedMessages(prisma);
-    const time = new Date();
-    const messages = await prisma.schedule.findMany({
-      where: {
-        date: {
-          lte: time
-        },
-      },
-    });
-    console.log(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`);
-    console.log(messages);
-  }
-  catch (error) {
-    console.error(error);
-  }
-});
+// scheduleJob("*/5 * * * *", async () => {
+//   try {
+//     await clearAndUpdateOutdatedMessages(prisma);
+//     const time = new Date();
+//     const messages = await prisma.schedule.findMany({
+//       where: {
+//         date: {
+//           lte: time
+//         },
+//       },
+//     });
+//     console.log(`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`);
+//     console.log(messages);
+//   }
+//   catch (error) {
+//     console.error(error);
+//   }
+// });
 
 (async () => {
   await app.start();

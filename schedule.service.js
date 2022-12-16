@@ -28,9 +28,15 @@ exports.cancelTask = async (job_id) => {
 exports.addTask = async (job) => {
     try {
         const cb = (job) => {
+            const jobDate = new Date(job.date);
+            const now = new Date();
+            now.setHours(jobDate.getHours());
+            now.setMinutes(jobDate.getMinutes());
+            now.setSeconds(0)
+            now.setMilliseconds(0)
             if (job.conversations) {
                 job.conversations.map((conversation) => {
-                    postMessage(conversation, job.message, job.date);
+                    postMessage(conversation, job.message, now);
                     sleep(1000);
                 })
             }
