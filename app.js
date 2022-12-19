@@ -164,6 +164,10 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   }
 });
 
+scheduleJob('0 0 0 * * *', async () => {
+  
+});
+
 (async () => {
   await app.start();
   await restoreTasks();
