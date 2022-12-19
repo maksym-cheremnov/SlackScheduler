@@ -36,8 +36,7 @@ bot.action('message_action', async ({ payload, logger }) => {
         if (jobId) {
             console.log(jobId.toString())
             console.log("Everything fine");
-            const cancelJob = await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-            console.log(cancelJob.toString());
+            await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
         } else console.log('Something went wrong')
 
     } catch (error) {
