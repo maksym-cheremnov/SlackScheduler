@@ -5,56 +5,18 @@ const { jobStatus } = require("./types");
 
 exports.clearAndUpdateOutdatedMessages = async (prisma) => {
     const now = new Date();
-    const outdatedMsgs = await prisma.schedule.deleteMany({
+    const outdatedMsgs = await prisma.job.deleteMany({
         where: {
-            OR: [
-                {
-                    AND: [
-                        {
-                            date: {
-                                lte: now,
-                            },
-                        },
-                        {
-                            isRepeated: {
-                                equals: false,
-                            },
-                        },
-                    ],
-                },
-                {
-                    AND: [
-                        {
-                            repeat_end_date: {
-                                lte: now,
-                            },
-                        },
-                        {
-                            isRepeated: {
-                                equals: true,
-                            },
-                        },
-                    ],
-                },
-            ],
+            repeat_end_date: {
+                lte: now,
+            },
         },
     });
     console.log("Messages for deleting:");
     console.log(outdatedMsgs);
-    const repeatedMsgs = await prisma.schedule.findMany({
+    const repeatedMsgs = await prisma.job.findMany({
         where: {
-            AND: [
-                {
-                    date: {
-                        lte: now,
-                    },
-                },
-                {
-                    isRepeated: {
-                        equals: true,
-                    },
-                },
-            ],
+            status: jobStatus.ACTIVE,
         },
     });
     console.log("Messages for updating:");
