@@ -14,7 +14,7 @@ exports.restoreTasks = async () => {
                 status: jobStatus.ACTIVE
             }
         })
-        if (jobs.length) {
+        if (jobs) {
             jobs.forEach(job => {
                 if (job.status === jobStatus.ACTIVE && job.repeat_end_date > new Date()) {
                     this.addTask(job);
@@ -57,10 +57,10 @@ exports.addTask = async (job) => {
 }
 
 exports.cancelTask = async (data) => {
-    this.cancelSchedule(data.job_id);
+    // await this.cancelSchedule(data.job_id);
     await prisma.job.update({
         where: {
-            id: data.id
+            id: +data.id
         }, data: {
             status: jobStatus.CANCEL,
         }
@@ -73,7 +73,7 @@ exports.newSchedule = (time, id, cb) => {
     JobsMapper.set(id, job);
 }
 
-exports.cancelSchedule = (uuid) => {
+exports.cancelSchedule = async (uuid) => {
     if (JobsMapper.has(uuid)) {
         JobsMapper.get(uuid);
         JobsMapper.delete(uuid);
