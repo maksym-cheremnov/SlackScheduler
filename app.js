@@ -3,7 +3,7 @@ const { App } = require("@slack/bolt");
 const { scheduleJob } = require("node-schedule")
 const modalView = require(('./modal_view_body.js'));
 const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
-const { clearAndUpdateOutdatedMessages, createJob } = require(('./database_action_handler.js'));
+const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
 const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions');
 const { createTask, restoreTasks } = require('./schedule.service.js');
 const { cron } = require("cron-validate")
@@ -55,30 +55,30 @@ app.view("new_scheduled_message", async ({ ack, body, view, client, logger, cont
         sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.message.message_text.value, post_at.getTime());
         break;
       case "daily":
-        await createJob({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        await createTask({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "weekDay":
-        await createJob({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        await createTask({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "weelky":
-        await createJob({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        await createTask({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "onceTwoWeeks":
-        await createJob({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        await createTask({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "monthly":
-        await createJob({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        await createTask({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         break;
 
       case "custom":
         const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
         const newCron = cron(customCron);
         if (newCron.isValid()) {
-          await createJob({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+          await createTask({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
         }
 
         break;
@@ -131,7 +131,8 @@ app.action('message_action', async (event) => {
       if (jobId) {
           const parsedStringArr = jobId.split(',');
           await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-      } else console.log('Something went wrong')
+      } else console.log('Something went wrong');
+      
       const view = await CreateScheduledMessagesView(event.payload.user);
 
       await client.views.publish({

@@ -33,7 +33,7 @@ async function createScheduledMsgInfo(blocks, userId) {
             type: "section",
             text: {
                 type: "mrkdwn",
-                text: `Scheduled time: *${date.toLocaleTimeString()}*\n Scheduled pattern: ${parseProperCron(pattern_type)} \nMessage scheduled to conversations: ${conversations.join(',')}\n Message filled: ${message}`,
+                text: `Scheduled time: *${date.toLocaleTimeString()}*\nScheduled pattern: ${parseProperCron(pattern_type)} \nMessage scheduled to conversations: ${conversations.join(',')}\nMessage text: ${message}`,
             },
             accessory: {
                 type: "overflow",

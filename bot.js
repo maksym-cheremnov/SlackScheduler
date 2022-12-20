@@ -106,25 +106,25 @@ const bot = new App({
 //     }
 // });
 
-bot.action('message_action', async (event) => {
-    await event.ack();
-    try {
-        const jobId = event.payload.selected_option.value;
-        if (jobId) {
-            const parsedStringArr = jobId.split(',');
-            await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-        } else console.log('Something went wrong')
-        event.action('delete message')
-        const view = await CreateScheduledMessagesView(event.payload.user);
+// bot.action('message_action', async (event) => {
+//     await event.ack();
+//     try {
+//         const jobId = event.payload.selected_option.value;
+//         if (jobId) {
+//             const parsedStringArr = jobId.split(',');
+//             await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
+//         } else console.log('Something went wrong')
+//         event.action('delete message')
+//         const view = await CreateScheduledMessagesView(event.payload.user);
 
-        await client.views.publish({
-            user_id: event.payload.user,
-            view: view
-        });
-    } catch (error) {
-        logger.error(error);
-    }
-});
+//         await client.views.publish({
+//             user_id: event.payload.user,
+//             view: view
+//         });
+//     } catch (error) {
+//         logger.error(error);
+//     }
+// });
 
 (async () => {
     await bot.start();
