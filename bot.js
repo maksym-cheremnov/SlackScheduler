@@ -128,6 +128,6 @@ const bot = new App({
 
 (async () => {
     await bot.start();
-    await restoreTasks();
+
     console.log("⚡️ Slack bot is running!");
 })();

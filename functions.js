@@ -95,7 +95,8 @@ exports.extractMessageFromDatabase = async (userId) => {
             date: {
                 lte: time,
             },
-            user: userId
+            user: userId,
+            status: 'ACTIVE'
         },
     });
 
@@ -155,7 +156,7 @@ exports.customCronType = (arr) => {
 
 exports.postMessage = (channelId, messageText, execTime) => {
     const parsedTime = execTime.getTime() / 1000
-    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parsedTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_USER_TOKEN } })
+    request(`https://slack.com/api/chat.scheduleMessage?channel=${channelId}&post_at=${parsedTime}&text=${messageText}&pretty=1`, { method: "POST", headers: { authorization: "Bearer " + process.env.SLACK_BOT_TOKEN } })
 }
 
 exports.sendSeveralMsg = (client, conversations, messageText, execTime) => {

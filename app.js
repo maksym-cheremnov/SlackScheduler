@@ -5,7 +5,7 @@ const modalView = require(('./modal_view_body.js'));
 const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
 const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
 const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions');
-const { createTask, restoreTasks } = require('./schedule.service.js');
+const { createTask, restoreTasks, cancelTask } = require('./schedule.service.js');
 const { cron } = require("cron-validate")
 const { cronTypes } = require("./types.js");
 /*
@@ -42,7 +42,7 @@ app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
   }
 });
 
-app.view("new_scheduled_message", async ({ ack, body, view, client, logger, context }) => {
+app.view("new_scheduled_message", async ({ ack, body, view, client, logger }) => {
   try {
     await ack();
     const user = body.user.id;
@@ -107,7 +107,7 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
   }
 });
 
-app.event("app_home_opened", async ({ payload, client }) => {
+app.event("app_home_opened", async ({ payload, client, logger }) => {
   const userId = payload.user;
   try {
     const view = await CreateScheduledMessagesView(userId);
@@ -117,30 +117,30 @@ app.event("app_home_opened", async ({ payload, client }) => {
       view: view
     });
 
-    console.log(result);
+    logger.info(result);
   }
   catch (error) {
-    console.error(error);
+    logger.error(error);
   }
 });
 
-app.action('message_action', async (event) => {
-  await event.ack();
+app.action('message_action', async ({payload, ack, client, body, logger}) => {
   try {
-      const jobId = event.payload.selected_option.value;
-      if (jobId) {
-          const parsedStringArr = jobId.split(',');
-          await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-      } else console.log('Something went wrong');
-      
-      const view = await CreateScheduledMessagesView(event.payload.user);
+    await ack();
+    const jobId = payload.selected_option.value;
+    if (jobId) {
+      const parsedStringArr = jobId.split(',');
+      await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
+    } else console.log('Something went wrong');
 
-      await client.views.publish({
-          user_id: event.payload.user,
-          view: view
-      });
+    const view = await CreateScheduledMessagesView(payload.user);
+
+    await client.views.update({
+      view: view,
+      view_id: body.view.id
+    });
   } catch (error) {
-      logger.error(error);
+    logger.error(error);
   }
 });
 
