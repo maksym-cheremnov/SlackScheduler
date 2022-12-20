@@ -29,83 +29,83 @@ const app = new App({
   port: process.env.USER_PORT || 3000,
 });
 
-// app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
-//   try {
-//     await ack();
-//     const view = modalView.CreateModalView();
-//     await client.views.open({
-//       trigger_id: shortcut.trigger_id,
-//       view: view
-//     });
-//   } catch (error) {
-//     logger.error(error);
-//   }
-// });
+app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
+  try {
+    await ack();
+    const view = modalView.CreateModalView();
+    await client.views.open({
+      trigger_id: shortcut.trigger_id,
+      view: view
+    });
+  } catch (error) {
+    logger.error(error);
+  }
+});
 
-// app.view("new_scheduled_message", async ({ ack, body, view, client, logger, context }) => {
-//   try {
-//     await ack();
-//     const user = body.user.id;
-//     const viewValues = view.state.values;
-//     const post_at = getParsedTime(viewValues);
-//     const repeatedPattern = viewValues.schedule_repeat.repeat_pattern.selected_option.value;
+app.view("new_scheduled_message", async ({ ack, body, view, client, logger, context }) => {
+  try {
+    await ack();
+    const user = body.user.id;
+    const viewValues = view.state.values;
+    const post_at = getParsedTime(viewValues);
+    const repeatedPattern = viewValues.schedule_repeat.repeat_pattern.selected_option.value;
 
-//     switch (repeatedPattern) {
-//       case "none":
-//         sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.message.message_text.value, post_at.getTime());
-//         break;
-//       case "daily":
-//         await createJob({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         break;
+    switch (repeatedPattern) {
+      case "none":
+        sendSeveralMsg(client, viewValues.conversations.conversations_list.selected_conversations, viewValues.message.message_text.value, post_at.getTime());
+        break;
+      case "daily":
+        await createJob({ pattern_type: cronTypes.daily, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        break;
 
-//       case "weekDay":
-//         await createJob({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         break;
+      case "weekDay":
+        await createJob({ pattern_type: cronTypes.weekDay, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        break;
 
-//       case "weelky":
-//         await createJob({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         break;
+      case "weelky":
+        await createJob({ pattern_type: cronTypes.weelky, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        break;
 
-//       case "onceTwoWeeks":
-//         await createJob({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         break;
+      case "onceTwoWeeks":
+        await createJob({ pattern_type: cronTypes.onceTwoWeeks, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        break;
 
-//       case "monthly":
-//         await createJob({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         break;
+      case "monthly":
+        await createJob({ pattern_type: cronTypes.monthly, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        break;
 
-//       case "custom":
-//         const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
-//         const newCron = cron(customCron);
-//         if (newCron.isValid()) {
-//           await createJob({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
-//         }
+      case "custom":
+        const customCron = customCronType(viewValues.customDay_repeat.custom_days_selector.selected_options);
+        const newCron = cron(customCron);
+        if (newCron.isValid()) {
+          await createJob({ pattern_type: newCron, repeat_end_date: viewValues.pattern_end.date_value.selected_date, user: user, conversations: viewValues.conversations.conversations_list.selected_conversations, message: viewValues.message.message_text.value, date: post_at });
+        }
 
-//         break;
+        break;
 
-//     }
-//   } catch (err) {
-//     logger.error(err);
-//   }
-// })
+    }
+  } catch (err) {
+    logger.error(err);
+  }
+})
 
-// app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
-//   await ack();
-// });
+app.view({ callback_id: 'new_scheduled_message', type: 'view_closed' }, async ({ ack, body, view, client }) => {
+  await ack();
+});
 
-// app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
-//   await ack();
-//   try {
-//     const viewVal = modalView.CreateModalView(body.view.private_metadata, action.selected_option);
-//     await client.views.update({
-//       view: viewVal,
-//       view_id: body.view.id
-//     });
-//   }
-//   catch (error) {
-//     logger.error(error);
-//   }
-// });
+app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
+  await ack();
+  try {
+    const viewVal = modalView.CreateModalView(body.view.private_metadata, action.selected_option);
+    await client.views.update({
+      view: viewVal,
+      view_id: body.view.id
+    });
+  }
+  catch (error) {
+    logger.error(error);
+  }
+});
 
 app.event("app_home_opened", async ({ payload, client }) => {
   const userId = payload.user;
@@ -121,6 +121,25 @@ app.event("app_home_opened", async ({ payload, client }) => {
   }
   catch (error) {
     console.error(error);
+  }
+});
+
+app.action('message_action', async (event) => {
+  await event.ack();
+  try {
+      const jobId = event.payload.selected_option.value;
+      if (jobId) {
+          const parsedStringArr = jobId.split(',');
+          await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
+      } else console.log('Something went wrong')
+      const view = await CreateScheduledMessagesView(event.payload.user);
+
+      await client.views.publish({
+          user_id: event.payload.user,
+          view: view
+      });
+  } catch (error) {
+      logger.error(error);
   }
 });
 
