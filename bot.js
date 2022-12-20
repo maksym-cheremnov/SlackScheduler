@@ -1,18 +1,14 @@
 require("dotenv").config();
 const { App } = require("@slack/bolt");
 const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
-const { cancelTask, restoreTasks } = require("./schedule.service");
-const modalView = require(('./modal_view_body.js'));
-const { createJob } = require(('./database_action_handler.js'));
-const { sendSeveralMsg, customCronType, getParsedTime } = require('./functions');
-const { cron } = require("cron-validate")
+const { request } = require("undici");
 
 const bot = new App({
     token: process.env.SLACK_BOT_TOKEN,
     signingSecret: process.env.SLACK_SIGNING_SECRET,
     socketMode: true,
     appToken: process.env.SLACK_APP_TOKEN,
-    port: process.env.BOT_PORT || 3001
+    port: process.env.BOT_PORT || 8081
 });
 
 bot.event("app_home_opened", async ({ payload, client }) => {
@@ -32,20 +28,26 @@ bot.event("app_home_opened", async ({ payload, client }) => {
     }
 });
 
-bot.action('message_action', async ({payload, ack, client, body, logger}) => {
+bot.action('message_action', async ({ ack, payload, logger, client, body }) => {
+    await ack();
     try {
-        await ack();
         const jobId = payload.selected_option.value;
         if (jobId) {
             const parsedStringArr = jobId.split(',');
-            await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-        } else console.log('Something went completly wrong');
+            await request(process.env.URL + '/api/cancel_task', {
+                method: "POST",
+                data: {
+                    id: parsedStringArr[0],
+                    job_id: parsedStringArr[1]
+                }
+            })
+        } else console.log('Something went wrong')
 
         const view = await CreateScheduledMessagesView(payload.user);
 
         await client.views.update({
-            view: view,
-            view_id: body.view.id
+            view_id: body.view.id,
+            view: view
         });
     } catch (error) {
         logger.error(error);
@@ -54,6 +56,5 @@ bot.action('message_action', async ({payload, ack, client, body, logger}) => {
 
 (async () => {
     await bot.start();
-
     console.log("⚡️ Slack bot is running!");
 })();

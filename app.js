@@ -7,25 +7,31 @@ const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions')
 const { createTask, restoreTasks, cancelTask } = require('./schedule.service.js');
 const { cron } = require("cron-validate")
 const { cronTypes } = require("./types.js");
-/*
-const app = new App({
-  logLevel: LogLevel.DEBUG,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-  clientId: process.env.SLACK_CLIENT_ID,
-  clientSecret: process.env.SLACK_CLIENT_SECRET,
-  stateSecret: 'my-state-secret',
-  scopes: ['channels:history', 'chat:write', 'commands'],
-});
+const fastify = require('fastify')({ logger: true });
 
-*/
+fastify.post('/api/cancel_task', async (request, _) => {
+  try {
+    await cancelTask(request.body);
+  } catch (error) {
+    console.error("Something went wrong with task cancel " + error);
+  }
+})
+
+const start = async () => {
+  try {
+    await fastify.listen({ port: 3000 })
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
+
 const app = new App({
   token: process.env.SLACK_USER_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
-  port: process.env.USER_PORT || 3000,
+  port: process.env.USER_PORT || 8080
 });
 
 app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
@@ -112,6 +118,7 @@ scheduleJob('0 0 * * *', async () => {
 
 (async () => {
   await app.start();
+  await start();
   await restoreTasks();
   console.log("⚡️ Slack app is running!");
 })();
