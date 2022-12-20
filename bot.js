@@ -3,6 +3,10 @@ const { App } = require("@slack/bolt");
 const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
 const { cancelTask, restoreTasks } = require("./schedule.service");
 const modalView = require(('./modal_view_body.js'));
+const { createJob } = require(('./database_action_handler.js'));
+const { sendSeveralMsg, customCronType, getParsedTime } = require('./functions');
+const { cron } = require("cron-validate")
+
 
 const bot = new App({
     token: process.env.SLACK_BOT_TOKEN,
@@ -67,16 +71,16 @@ bot.view("new_scheduled_message", async ({ ack, body, view, client, logger }) =>
 bot.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
     await ack();
     try {
-      const viewVal = modalView.CreateModalView(body.view.private_metadata, action.selected_option);
-      await client.views.update({
-        view: viewVal,
-        view_id: body.view.id
-      });
+        const viewVal = modalView.CreateModalView(body.view.private_metadata, action.selected_option);
+        await client.views.update({
+            view: viewVal,
+            view_id: body.view.id
+        });
     }
     catch (error) {
-      logger.error(error);
+        logger.error(error);
     }
-  });
+});
 
 bot.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
     try {
