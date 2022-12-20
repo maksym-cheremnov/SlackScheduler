@@ -57,7 +57,7 @@ exports.addTask = async (job) => {
 }
 
 exports.cancelTask = async (data) => {
-    await this.cancelSchedule(data.job_id);
+    // await this.cancelSchedule(data.job_id);
     await prisma.job.update({
         where: {
             id: +data.id

@@ -2,7 +2,6 @@ require("dotenv").config();
 const { App } = require("@slack/bolt");
 const { scheduleJob } = require("node-schedule")
 const modalView = require(('./modal_view_body.js'));
-const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
 const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
 const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions');
 const { createTask, restoreTasks, cancelTask } = require('./schedule.service.js');
@@ -103,43 +102,6 @@ app.action('repeat_pattern', async ({ action, body, client, ack, logger }) => {
     });
   }
   catch (error) {
-    logger.error(error);
-  }
-});
-
-app.event("app_home_opened", async ({ payload, client, logger }) => {
-  const userId = payload.user;
-  try {
-    const view = await CreateScheduledMessagesView(userId);
-    // Call the views.publish method using the WebClient passed to listeners
-    const result = await client.views.publish({
-      user_id: userId,
-      view: view
-    });
-
-    logger.info(result);
-  }
-  catch (error) {
-    logger.error(error);
-  }
-});
-
-app.action('message_action', async ({payload, ack, client, body, logger}) => {
-  try {
-    await ack();
-    const jobId = payload.selected_option.value;
-    if (jobId) {
-      const parsedStringArr = jobId.split(',');
-      await cancelTask({ id: parsedStringArr[0], job_id: parsedStringArr[1] });
-    } else console.log('Something went wrong');
-
-    const view = await CreateScheduledMessagesView(payload.user);
-
-    await client.views.update({
-      view: view,
-      view_id: body.view.id
-    });
-  } catch (error) {
     logger.error(error);
   }
 });
