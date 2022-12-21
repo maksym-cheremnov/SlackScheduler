@@ -9,17 +9,9 @@ const { cron } = require("cron-validate")
 const { cronTypes } = require("./types.js");
 const fastify = require('fastify')({ logger: true });
 
-fastify.post('/api/cancel_task', async (request, _) => {
-  try {
-    await cancelTask(request.body);
-  } catch (error) {
-    console.error("Something went wrong with task cancel " + error);
-  }
-})
-
 const start = async () => {
   try {
-    await fastify.listen({ port: 3000 })
+    await fastify.listen({ port: process.env.FATSIFY_PORT || 8080 })
   } catch (err) {
     fastify.log.error(err)
     process.exit(1)
@@ -31,8 +23,15 @@ const app = new App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
-  port: process.env.USER_PORT || 8080
 });
+
+fastify.post('/api/cancel_task', async (request, _) => {
+  try {
+    await cancelTask(request.body);
+  } catch (error) {
+    console.error("Something went wrong with task cancel " + error);
+  }
+})
 
 app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
   try {

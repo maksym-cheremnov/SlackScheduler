@@ -8,7 +8,6 @@ const bot = new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET,
     socketMode: true,
     appToken: process.env.SLACK_APP_TOKEN,
-    port: process.env.BOT_PORT || 8081
 });
 
 bot.event("app_home_opened", async ({ payload, client }) => {
@@ -34,7 +33,7 @@ bot.action('message_action', async ({ ack, payload, logger, client, body }) => {
         const jobId = payload.selected_option.value;
         if (jobId) {
             const parsedStringArr = jobId.split(',');
-            await request(process.env.URL + '/api/cancel_task', {
+            await request(process.env.FRONT_URL + '/api/cancel_task', {
                 method: "POST",
                 data: {
                     id: parsedStringArr[0],
