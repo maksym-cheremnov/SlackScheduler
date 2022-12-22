@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { App } = require("@slack/bolt");
+const { App, LogLevel} = require("@slack/bolt");
 const { scheduleJob } = require("node-schedule")
 const modalView = require(('./modal_view_body.js'));
 const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
@@ -7,7 +7,7 @@ const { customCronType, sendSeveralMsg, getParsedTime } = require('./functions')
 const { createTask, restoreTasks, cancelTask } = require('./schedule.service.js');
 const { cron } = require("cron-validate")
 const { cronTypes } = require("./types.js");
-const fastify = require('fastify')({ logger: true });
+const fastify = require('fastify')({ logger: false });
 
 const start = async () => {
   try {
@@ -16,9 +16,10 @@ const start = async () => {
     fastify.log.error(err)
     process.exit(1)
   }
-}
+};
 
 const app = new App({
+  logLevel: LogLevel.DEBUG,
   token: process.env.SLACK_USER_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
   socketMode: true,
@@ -31,7 +32,7 @@ fastify.post('/api/cancel_task', async (request, _) => {
   } catch (error) {
     console.error("Something went wrong with task cancel " + error);
   }
-})
+});
 
 app.shortcut("schedule", async ({ shortcut, ack, client, logger }) => {
   try {

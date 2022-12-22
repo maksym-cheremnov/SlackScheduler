@@ -21,6 +21,10 @@ exports.restoreTasks = async () => {
                 }
             });
         }
+        console.log("====Full list of contacts:====")
+        for (let [key, value] of JobsMapper) {
+            console.log(key + ' = ' + value)
+        };
     } catch (error) {
         console.log(error);
     }

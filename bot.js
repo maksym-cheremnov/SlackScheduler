@@ -14,13 +14,10 @@ bot.event("app_home_opened", async ({ payload, client }) => {
     const userId = payload.user;
     try {
         const view = await CreateScheduledMessagesView(userId);
-        // Call the views.publish method using the WebClient passed to listeners
         const result = await client.views.publish({
             user_id: userId,
             view: view
         });
-
-        console.log(result);
     }
     catch (error) {
         console.error(error);
@@ -29,25 +26,24 @@ bot.event("app_home_opened", async ({ payload, client }) => {
 
 bot.action('message_action', async ({ ack, payload, logger, client, body }) => {
     await ack();
+    const jobId = payload.selected_option.value;
     try {
-        const jobId = payload.selected_option.value;
-        if (jobId) {
-            const parsedStringArr = jobId.split(',');
-            await request(process.env.FRONT_URL + '/api/cancel_task', {
-                method: "POST",
-                data: {
-                    id: parsedStringArr[0],
-                    job_id: parsedStringArr[1]
-                }
-            })
-        } else console.log('Something went wrong')
+        const parsedStringArr = jobId.split(',');
+        const url = `${process.env.FRONT_URL}/api/cancel_task`;
+        request(url, {
+            method: "POST",
+            data: {
+                id: parsedStringArr[0],
+                job_id: parsedStringArr[1]
+            }
+        });
 
         const view = await CreateScheduledMessagesView(payload.user);
-
         await client.views.update({
             view_id: body.view.id,
             view: view
         });
+
     } catch (error) {
         logger.error(error);
     }
