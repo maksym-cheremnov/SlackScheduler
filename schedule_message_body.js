@@ -1,9 +1,10 @@
 const { extractMessageFromDatabase } = require("./functions.js");
 const { cronTypes } = require('./types');
-exports.CreateScheduledMessagesView = async (userId) => {
+exports.CreateScheduledMessagesView = async (userId, singleMes) => {
     let blocks = [];
     createHeader(blocks);
-    await createScheduledMsgInfo(blocks, userId);
+    addSingleMessages(blocks, singleMes);
+    await createScheduledMsgInfo(blocks, userId, singleMes);
     return JSON.stringify({
         type: "home",
         blocks: blocks,
@@ -26,6 +27,33 @@ function createHeader(blocks) {
 function parseProperCron(value) {
     return Object.entries(cronTypes).find(([_, val]) => value === val)[0];
 }
+
+function addSingleMessages(blocks, singleMes) {
+    singleMes.scheduled_messages.forEach((mes) => {
+        blocks.push({
+            type: "section",
+            text: {
+                type: "mrkdwn",
+                text: `Scheduled time: *${new Date(mes.post_at)}*\nScheduled pattern: Message without pattern \nMessage scheduled to conversations: ${mes.channel_id}\nMessage text: ${mes.text}`,
+            },
+            accessory: {
+                type: "overflow",
+                options: [
+                    {
+                        text: {
+                            type: "plain_text",
+                            text: "Delete",
+                            emoji: true,
+                        },
+                        value: `${mes.id}`,
+                    },
+                ],
+                action_id: "single_delete",
+            },
+        })
+    })
+}
+
 async function createScheduledMsgInfo(blocks, userId) {
     const messages = await extractMessageFromDatabase(userId);
     messages.forEach(({ date, conversations, message, id, job_id, pattern_type }) => {

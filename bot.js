@@ -1,9 +1,10 @@
 require("dotenv").config();
-const { App } = require("@slack/bolt");
+const { App, LogLevel } = require("@slack/bolt");
 const { CreateScheduledMessagesView } = require('./schedule_message_body.js');
 const { request } = require("undici");
 
 const bot = new App({
+    logLevel: LogLevel.DEBUG,
     token: process.env.SLACK_BOT_TOKEN,
     signingSecret: process.env.SLACK_SIGNING_SECRET,
     socketMode: true,
@@ -13,8 +14,10 @@ const bot = new App({
 bot.event("app_home_opened", async ({ payload, client }) => {
     const userId = payload.user;
     try {
-        const view = await CreateScheduledMessagesView(userId);
-        const result = await client.views.publish({
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        const singleMes = await client.chat.scheduledMessages.list({ oldest: sevenDaysAgo.getTime() / 1000 });
+        const view = await CreateScheduledMessagesView(userId, singleMes);
+        await client.views.publish({
             user_id: userId,
             view: view
         });
@@ -24,7 +27,7 @@ bot.event("app_home_opened", async ({ payload, client }) => {
     }
 });
 
-bot.action('message_action', async ({ ack, payload, logger, client, body }) => {
+bot.action('message_delete', async ({ ack, payload, logger, client, body }) => {
     await ack();
     const jobId = payload.selected_option.value;
     try {
