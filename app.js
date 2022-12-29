@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { App, LogLevel} = require("@slack/bolt");
+const { App, LogLevel } = require("@slack/bolt");
 const { scheduleJob } = require("node-schedule")
 const modalView = require(('./modal_view_body.js'));
 const { clearAndUpdateOutdatedMessages } = require(('./database_action_handler.js'));
@@ -20,15 +20,48 @@ const start = async () => {
 
 const app = new App({
   logLevel: LogLevel.DEBUG,
-  token: process.env.SLACK_USER_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
+  clientId: process.env.SLACK_CLIENT_ID,
+  clientSecret: process.env.SLACK_CLIENT_SECRET,
+  stateSecret: process.env.STATE_SECRET,
+  scopes: ['chat:write'],
+  installationStore: {
+    storeInstallation: async (installation) => {
+      if (installation.isEnterpriseInstall && installation.enterprise !== undefined) {
+        //TODP add enterprise to database 
+      }
+      if (installation.team !== undefined) {
+        //TODO add team to database
+      }
+      throw new Error('Failed saving installation data to installationStore');
+    },
+    fetchInstallation: async (installQuery) => {
+      if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+        //TODO get enterprise from database
+      }
+      if (installQuery.teamId !== undefined) {
+        //TODO get team from database
+      }
+      throw new Error('Failed fetching installation');
+    },
+    deleteInstallation: async (installQuery) => {
+      if (installQuery.isEnterpriseInstall && installQuery.enterpriseId !== undefined) {
+        //TODO delete enterprise from database
+      }
+      if (installQuery.teamId !== undefined) {
+        //TODO delete team from database
+      }
+      throw new Error('Failed to delete installation');
+    },
+    installerOptions: {
+      directInstall: true
+    }
+  }
 });
 
-fastify.post('/api/cancel_task', async (request, _) => {
+fastify.post('/api/cancel_task', async (request) => {
   try {
-    await cancelTask(request.body);
+    cancelTask(request.body);
   } catch (error) {
     console.error("Something went wrong with task cancel " + error);
   }

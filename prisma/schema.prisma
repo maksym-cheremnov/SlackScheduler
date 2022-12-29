@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL_2")
 }
 
 model Job {
@@ -19,4 +19,11 @@ model Job {
   status               String
   created_at           DateTime           @default(now())
   updated_at           DateTime           @updatedAt
+}
+
+model Oauth {
+  id                   Int      @id @default(autoincrement())
+  user_id              String
+  enterprise_id        String
+  token                String
 }
